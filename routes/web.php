@@ -29,4 +29,21 @@ Route::middleware('auth')->group(function () {
 Route::get('auth/github', [GithubController::class, 'redirect'])->name('github.login');
 Route::get('auth/github/callback', [GithubController::class, 'callback']);
 
-require __DIR__.'/auth.php';
+// Chat route
+Route::get('/chat/{receiverId?}', function () {
+    return Inertia::render('Chat/Index');
+})->name('chat');
+
+// User listing route
+Route::get('/users', function () {
+    return Inertia::render('Users/Index');
+})->name('users.index');
+
+// Admin dashboard route
+Route::middleware('admin')->group(function () {
+    Route::get('/admin/dashboard', function () {
+        return Inertia::render('Admin/Dashboard');
+    })->name('admin.dashboard');
+});
+
+require __DIR__ . '/auth.php';
