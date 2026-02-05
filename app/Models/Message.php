@@ -26,9 +26,15 @@ class Message extends Model
         ];
     }
 
-    // Relation with expeditor
+    // Relation with sender
     public function sender()
     {
         return $this->belongsTo(User::class, 'sender_id');
+    }
+
+    // Relation with receiver
+    public function receiver()
+    {
+        return $this->belongsTo(User::class, 'receiver_id');
     }
 }
