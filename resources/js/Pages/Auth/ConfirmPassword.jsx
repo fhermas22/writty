@@ -1,8 +1,9 @@
+import { useEffect } from 'react';
+import GuestLayout from '@/Layouts/GuestLayout';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
-import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, useForm } from '@inertiajs/react';
 
 export default function ConfirmPassword() {
@@ -10,26 +11,32 @@ export default function ConfirmPassword() {
         password: '',
     });
 
+    useEffect(() => {
+        return () => {
+            reset('password');
+        };
+    }, []);
+
     const submit = (e) => {
         e.preventDefault();
-
-        post(route('password.confirm'), {
-            onFinish: () => reset('password'),
-        });
+        post(route('password.confirm'));
     };
 
     return (
         <GuestLayout>
-            <Head title="Confirm Password" />
+            <Head title="Confirmer le mot de passe" />
 
-            <div className="mb-4 text-sm text-gray-600">
-                This is a secure area of the application. Please confirm your
-                password before continuing.
+            <div className="text-center mb-8">
+                <img src="/logo.svg" className="w-16 h-16 mx-auto mb-4" alt="Writty Logo" />
+                <h1 className="text-3xl font-extrabold text-slate-900">Confirmer votre mot de passe</h1>
+                <p className="text-slate-500 mt-2">
+                    Ceci est une zone sécurisée de l'application. Veuillez confirmer votre mot de passe avant de continuer.
+                </p>
             </div>
 
-            <form onSubmit={submit}>
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
+            <form onSubmit={submit} className="space-y-6">
+                <div>
+                    <InputLabel forInput="password" value="Mot de passe" />
 
                     <TextInput
                         id="password"
@@ -44,9 +51,9 @@ export default function ConfirmPassword() {
                     <InputError message={errors.password} className="mt-2" />
                 </div>
 
-                <div className="mt-4 flex items-center justify-end">
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Confirm
+                <div className="flex justify-end mt-4">
+                    <PrimaryButton className="w-full justify-center py-4" disabled={processing}>
+                        Confirmer
                     </PrimaryButton>
                 </div>
             </form>
