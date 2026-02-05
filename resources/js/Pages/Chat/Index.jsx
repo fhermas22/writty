@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
-import axios from '@/lib/axios';
+import axios from 'axios';
 import UserList from './Partials/UserList';
 import ChatWindow from './Partials/ChatWindow';
 

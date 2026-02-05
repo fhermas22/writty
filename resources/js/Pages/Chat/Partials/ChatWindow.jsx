@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axios from '@/lib/axios';
+import axios from 'axios';
 import InputError from '@/Components/InputError';
 import PrimaryButton from '@/Components/PrimaryButton';
 
@@ -75,7 +75,7 @@ export default function ChatWindow({ currentUser, receiver }) {
         <div className="flex flex-col h-full bg-slate-50">
             <div className="p-4 border-b border-slate-200 bg-white shadow-sm flex items-center">
                 <img
-                    src={receiver.profil_pic || '/default_avatar.png'}
+                    src={receiver.profil_pic || 'images/default_avatar.png'}
                     alt={receiver.username}
                     className="w-10 h-10 rounded-full object-cover"
                 />

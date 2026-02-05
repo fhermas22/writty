@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link } from '@inertiajs/react';
-import axios from '@/lib/axios';
+import axios from 'axios';
 
 export default function UsersIndex({ auth }) {
     const [users, setUsers] = useState([]);
@@ -39,7 +39,7 @@ export default function UsersIndex({ auth }) {
                                 <div key={user._id} className="flex items-center p-4 bg-slate-50 rounded-xl shadow-sm border border-slate-100">
                                     <div className="relative">
                                         <img
-                                            src={user.profil_pic || '/default_avatar.png'}
+                                            src={user.profil_pic || 'images/default_avatar.png'}
                                             alt={user.username}
                                             className="w-12 h-12 rounded-full object-cover"
                                         />
