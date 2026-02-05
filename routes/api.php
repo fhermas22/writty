@@ -21,3 +21,9 @@ Route::middleware("auth:sanctum")->group(function () {
     Route::get("/messages/{receiverId}", [MessageController::class, "index"]);
     Route::post("/messages/{receiverId}", [MessageController::class, "store"]);
 });
+
+// User heartbeat route to update online status
+Route::middleware('auth:sanctum')->post('/user/heartbeat', function (Request $request) {
+    $request->user()->update(['last_seen_at' => now()]);
+    return response()->noContent();
+});
