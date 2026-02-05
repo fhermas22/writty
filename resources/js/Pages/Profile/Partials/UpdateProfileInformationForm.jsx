@@ -13,11 +13,15 @@ export default function UpdateProfileInformation({ mustVerifyEmail, status, clas
         email: user.email,
         bio: user.bio || '',
         profil_pic: null,
+        _method: 'patch',
     });
 
     const submit = (e) => {
         e.preventDefault();
-        post(route('profile.update'), { forceFormData: true });
+        post(route('profile.update'), {
+            forceFormData: true,
+            preserveScroll: true,
+        });
     };
 
     return (
