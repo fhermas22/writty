@@ -45,6 +45,6 @@ class GithubController extends Controller
 
         Auth::login($user);
 
-        return redirect(env('FRONTEND_URL') . '/dashboard');
+        return redirect(env('FRONTEND_URL') . '/chat');
     }
 }

@@ -11,7 +11,7 @@ export default function Welcome({ auth }) {
                 </p>
                 <div className="flex gap-4 justify-center">
                     {auth.user ? (
-                        <Link href={route('dashboard')} className="px-8 py-4 bg-white text-violet-600 rounded-full font-bold shadow-xl hover:scale-105 transition">Accéder au Dashboard</Link>
+                        <Link href={route('chat')} className="px-8 py-4 bg-white text-violet-600 rounded-full font-bold shadow-xl hover:scale-105 transition">Accéder au Chat</Link>
                     ) : (
                         <>
                             <Link href={route('login')} className="px-8 py-4 bg-white text-violet-600 rounded-full font-bold shadow-xl hover:scale-105 transition">Connexion</Link>
