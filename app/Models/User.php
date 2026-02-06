@@ -60,4 +60,8 @@ class User extends Authenticatable
             'last_seen_at' => 'datetime',
         ];
     }
+
+    public function getProfilPicUrlAttribute() {
+        return $this->profil_pic ? asset('storage/' . $this->profil_pic) : 'images/default_avatar.png';
+    }
 }

@@ -2,11 +2,18 @@ import ApplicationLogo from '@/Components/ApplicationLogo';
 import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
-import { Link, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { Link } from '@inertiajs/react';
+import { useState, useEffect } from 'react';
 
 export default function Authenticated({ user, header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            axios.post('/api/user/heartbeat');
+        }, 30000); // Send heartbeat every 30 seconds
+        return () => clearInterval(interval);
+    }, []);
 
     return (
         <div className="min-h-screen bg-slate-100">
@@ -47,6 +54,9 @@ export default function Authenticated({ user, header, children }) {
                                                 type="button"
                                                 className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-slate-500 bg-white hover:text-slate-700 focus:outline-none transition ease-in-out duration-150"
                                             >
+
+                                                <img src={user.profil_pic} className="h-10 w-10 mr-2 rounded-full border-2 border-violet-200" />
+
                                                 {user.username}
 
                                                 <svg

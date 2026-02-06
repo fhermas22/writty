@@ -8,23 +8,13 @@ import { Head, Link, useForm } from '@inertiajs/react';
 
 export default function Register() {
     const { data, setData, post, processing, errors, reset } = useForm({
-        firstname: '',
-        lastname: '',
-        username: '',
-        email: '',
-        password: '',
-        password_confirmation: '',
+        firstname: '', lastname: '', username: '', email: '',
+        password: '', password_confirmation: '', profil_pic: null,
     });
-
-    useEffect(() => {
-        return () => {
-            reset('password', 'password_confirmation');
-        };
-    }, []);
 
     const submit = (e) => {
         e.preventDefault();
-        post(route('register'));
+        post(route('register'), { forceFormData: true });
     };
 
     return (
@@ -39,6 +29,13 @@ export default function Register() {
 
             <form onSubmit={submit} className="space-y-6">
                 <div>
+                    <div>
+                        <InputLabel forInput="profil_pic" value="Photo de Profil (Optionnel)" />
+                        <input type="file" onChange={(e) => setData('profil_pic', e.target.files[0])}
+                            className="mt-1 mb-4 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100" />
+                        <InputError message={errors.profil_pic} />
+                    </div>
+
                     <InputLabel forInput="firstname" value="Prénom" />
                     <TextInput
                         id="firstname"
