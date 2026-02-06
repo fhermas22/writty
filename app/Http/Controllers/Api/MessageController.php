@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Events\MessageSent;
+use Illuminate\Support\Facades\Log;
 
 class MessageController extends Controller
 {
@@ -21,16 +22,24 @@ class MessageController extends Controller
     public function index(string $receiverId)
     {
         $user = Auth::user();
-        $messages = Message::where(function ($query) use ($user, $receiverId) {
-            $query->where("sender_id", $user->_id)
-                ->where("receiver_id", $receiverId);
-        })->orWhere(function ($query) use ($user, $receiverId) {
-            $query->where("sender_id", $receiverId)
-                ->where("receiver_id", $user->_id);
+
+        $myId = (string) $user->id;
+
+        Log::info("Chat entre " . $myId . " et " . $receiverId);
+
+        $messages = Message::where(function ($query) use ($myId, $receiverId) {
+            $query->where('sender_id', $myId)
+                ->where('receiver_id', $receiverId);
         })
-            ->orderBy("created_at", "asc")
-            ->with("sender") // Load sender details
-            ->get();
+        ->orWhere(function ($query) use ($myId, $receiverId) {
+            $query->where('sender_id', $receiverId)
+                ->where('receiver_id', $myId);
+        })
+        ->orderBy('created_at', 'asc')
+        ->get();
+
+
+        // dd($messages->toArray());
 
         // Mark messages as read if the current user is the receiver
         Message::where("sender_id", $receiverId)
@@ -50,6 +59,13 @@ class MessageController extends Controller
      */
     public function store(Request $request, string $receiverId)
     {
+        $receiver = User::where('_id', $receiverId)->orWhere('id', $receiverId)->first();
+
+        if (!$receiver) {
+            // \Log::error("Destinataire introuvable pour l'ID : " . $receiverId);
+            return response()->json(['message' => 'Destinataire non trouvé'], 404);
+        }
+
         $request->validate([
             'content' => 'nullable|string|max:2000',
             'image' => 'nullable|image|max:2048', // Max 2MB
@@ -81,5 +97,29 @@ class MessageController extends Controller
         broadcast(new MessageSent($user, $message->load('sender')))->toOthers();
 
         return response()->json($message->load('sender'), 201);
+    }
+
+    /**
+     * List of users for the chat
+     */
+    public function users()
+    {
+        $users = User::where('_id', '!=', auth()->id())->get();
+
+        return response()->json($users);
+    }
+
+    /**
+     * Get a specific user by ID.
+     */
+    public function showUser(string $id)
+    {
+        $user = User::where('_id', $id)->orWhere('id', $id)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'Utilisateur introuvable'], 404);
+        }
+
+        return response()->json($user);
     }
 }

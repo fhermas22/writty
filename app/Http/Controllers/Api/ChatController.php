@@ -56,6 +56,7 @@ class ChatController extends Controller
     {
         return User::where('_id', '!=', auth()->id())
                    ->select('firstname', 'lastname', 'username', 'profil_pic', 'is_online')
-                   ->get();
+                   ->get()
+                   ->values();
     }
 }

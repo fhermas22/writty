@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useState } from 'react';
 import GuestLayout from '@/Layouts/GuestLayout';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
@@ -7,10 +7,22 @@ import TextInput from '@/Components/TextInput';
 import { Head, Link, useForm } from '@inertiajs/react';
 
 export default function Register() {
+    const [preview, setPreview] = useState(null);
+
     const { data, setData, post, processing, errors, reset } = useForm({
         firstname: '', lastname: '', username: '', email: '',
         password: '', password_confirmation: '', profil_pic: null,
     });
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        setData('profil_pic', file);
+
+        // Generate a preview URL for the selected image
+        if (file) {
+            setPreview(URL.createObjectURL(file));
+        }
+    };
 
     const submit = (e) => {
         e.preventDefault();
@@ -29,39 +41,49 @@ export default function Register() {
 
             <form onSubmit={submit} className="space-y-6">
                 <div>
-                    <div>
-                        <InputLabel forInput="profil_pic" value="Photo de Profil (Optionnel)" />
-                        <input type="file" onChange={(e) => setData('profil_pic', e.target.files[0])}
-                            className="mt-1 mb-4 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100" />
-                        <InputError message={errors.profil_pic} />
-                    </div>
+                    <InputLabel forInput="profil_pic" value="Photo de Profil (Optionnel)" />
 
-                    <InputLabel forInput="firstname" value="Prénom" />
-                    <TextInput
-                        id="firstname"
-                        name="firstname"
-                        value={data.firstname}
-                        className="mt-1 block w-full"
-                        autoComplete="given-name"
-                        isFocused={true}
-                        onChange={(e) => setData('firstname', e.target.value)}
-                        required
+                    {/* File input with preview */}
+                    {preview && (
+                        <div className="mt-2 mb-4">
+                            <img src={preview} className="w-20 h-20 rounded-full object-cover border-2 border-primary" alt="Aperçu" />
+                        </div>
+                    )}
+
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="mt-1 mb-4 block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
                     />
-                    <InputError message={errors.firstname} className="mt-2" />
+                    <InputError message={errors.profil_pic} />
                 </div>
 
-                <div>
-                    <InputLabel forInput="lastname" value="Nom" />
-                    <TextInput
-                        id="lastname"
-                        name="lastname"
-                        value={data.lastname}
-                        className="mt-1 block w-full"
-                        autoComplete="family-name"
-                        onChange={(e) => setData('lastname', e.target.value)}
-                        required
-                    />
-                    <InputError message={errors.lastname} className="mt-2" />
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <InputLabel forInput="firstname" value="Prénom" />
+                        <TextInput
+                            id="firstname"
+                            value={data.firstname}
+                            className="mt-1 block w-full"
+                            isFocused={true}
+                            onChange={(e) => setData('firstname', e.target.value)}
+                            required
+                        />
+                        <InputError message={errors.firstname} className="mt-2" />
+                    </div>
+
+                    <div>
+                        <InputLabel forInput="lastname" value="Nom" />
+                        <TextInput
+                            id="lastname"
+                            value={data.lastname}
+                            className="mt-1 block w-full"
+                            onChange={(e) => setData('lastname', e.target.value)}
+                            required
+                        />
+                        <InputError message={errors.lastname} className="mt-2" />
+                    </div>
                 </div>
 
                 <div>

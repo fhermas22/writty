@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use MongoDB\Laravel\Eloquent\Model;
 
 class Message extends Model
 {
     protected $connection = 'mongodb';
     protected $collection = 'messages';
+    protected $appends = ['id'];
 
     protected $fillable = [
         'sender_id',

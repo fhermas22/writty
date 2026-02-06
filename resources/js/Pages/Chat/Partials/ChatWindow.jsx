@@ -10,27 +10,42 @@ export default function ChatWindow({ currentUser, receiver }) {
     const [errors, setErrors] = useState({});
     const messagesEndRef = useRef(null);
 
+    // Extracting IDs with fallback for MongoDB's _id
+    const receiverId = receiver?.id || receiver?._id;
+    const currentUserId = currentUser?.id || currentUser?._id;
+
     const fetchMessages = () => {
-        axios.get(`/api/messages/${receiver._id}`).then(response => {
+        if (!receiverId || receiverId === 'undefined') return;
+
+        axios.get(`/api/messages/${receiverId}`).then(response => {
             setMessages(response.data);
-        });
+        }).catch(err => console.error("Erreur fetch:", err));
     };
 
     useEffect(() => {
-        fetchMessages();
+        // Reset of messages when switching conversations to avoid showing old messages briefly
+        setMessages([]);
 
-        // Listen for new messages
-        window.Echo.private(`chat.${currentUser._id}`)
-            .listen('MessageSent', (e) => {
-                if (e.message.receiver_id === currentUser._id || e.message.sender_id === currentUser._id) {
-                    setMessages(prevMessages => [...prevMessages, e.message]);
-                }
-            });
+        if (receiverId) {
+            fetchMessages();
 
-        return () => {
-            window.Echo.leave(`chat.${currentUser._id}`);
-        };
-    }, [receiver._id, currentUser._id]);
+            // Listening for new messages in this conversation
+            const channel = window.Echo.private(`chat.${currentUserId}`)
+                .listen('MessageSent', (e) => {
+                    // Forced string conversion for robust comparison
+                    const sId = String(e.message.sender_id);
+                    const rId = String(e.message.receiver_id);
+                    const cId = String(currentUserId);
+                    const selectedId = String(receiverId);
+
+                    if ((sId === selectedId && rId === cId) || (sId === cId && rId === selectedId)) {
+                        setMessages(prev => [...prev, e.message]);
+                    }
+                });
+
+            return () => window.Echo.leave(`chat.${currentUserId}`);
+        }
+    }, [receiverId, currentUserId]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -38,35 +53,26 @@ export default function ChatWindow({ currentUser, receiver }) {
 
     const handleSendMessage = async (e) => {
         e.preventDefault();
+        if (!receiverId) return;
         setErrors({});
 
         const formData = new FormData();
-        if (newMessage) {
-            formData.append('content', newMessage);
-        }
-        if (imageFile) {
-            formData.append('image', imageFile);
-        }
-
-        if (!newMessage && !imageFile) {
-            setErrors({ content: 'Le message ne peut pas être vide.' });
-            return;
-        }
+        if (newMessage) formData.append('content', newMessage);
+        if (imageFile) formData.append('image', imageFile);
 
         try {
-            await axios.post(`/api/messages/${receiver._id}`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
+            const response = await axios.post(`/api/messages/${receiverId}`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
             });
+
+            setMessages(prev => [...prev, response.data]);
             setNewMessage('');
             setImageFile(null);
-            fetchMessages(); // Re-fetch messages to ensure all are updated and marked as read
         } catch (error) {
-            if (error.response && error.response.data.errors) {
+            if (error.response?.data.errors) {
                 setErrors(error.response.data.errors);
             } else {
-                console.error('Error sending message:', error);
+                console.error('Erreur envoi:', error);
             }
         }
     };
@@ -88,28 +94,32 @@ export default function ChatWindow({ currentUser, receiver }) {
             </div>
 
             <div className="flex-1 p-4 overflow-y-auto space-y-4">
-                {messages.map(message => (
-                    <div
-                        key={message._id}
-                        className={`flex ${message.sender_id === currentUser._id ? 'justify-end' : 'justify-start'}`}
-                    >
+                {messages.map(message => {
+                    const isMe = String(message.sender_id) === String(currentUserId);
+
+                    return (
                         <div
-                            className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl shadow-md
-                                ${message.sender_id === currentUser._id
-                                    ? 'bg-gradient-to-br from-primary to-secondary text-white rounded-br-none'
-                                    : 'bg-white text-slate-800 rounded-bl-none border border-slate-100'}
-                            `}
+                            key={message._id || message.id}
+                            className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
                         >
-                            {message.content && <p>{message.content}</p>}
-                            {message.image_url && (
-                                <img src={message.image_url} alt="Image envoyée" className="max-w-full h-auto rounded-lg mt-2" />
-                            )}
-                            <span className={`block text-xs mt-1 ${message.sender_id === currentUser._id ? 'text-slate-200' : 'text-slate-400'}`}>
-                                {new Date(message.created_at).toLocaleTimeString()}
-                            </span>
+                            <div
+                                className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl shadow-md
+                                    ${isMe
+                                        ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-br-none'
+                                        : 'bg-white text-slate-800 rounded-bl-none border border-slate-100'}
+                                `}
+                            >
+                                {message.content && <p className="text-sm">{message.content}</p>}
+                                {message.image_url && (
+                                    <img src={message.image_url} alt="Envoyée" className="max-w-full h-auto rounded-lg mt-2" />
+                                )}
+                                <span className={`block text-[10px] mt-1 ${isMe ? 'text-indigo-100 text-right' : 'text-slate-400 text-left'}`}>
+                                    {new Date(message.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                                </span>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
                 <div ref={messagesEndRef} />
             </div>
 

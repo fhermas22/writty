@@ -15,6 +15,7 @@ class User extends Authenticatable
 
     protected $connection = 'mongodb';
     protected $collection = 'users';
+    protected $appends = ['id'];
 
     /**
      * The attributes that are mass assignable.
@@ -63,5 +64,10 @@ class User extends Authenticatable
 
     public function getProfilPicUrlAttribute() {
         return $this->profil_pic ? asset('storage/' . $this->profil_pic) : 'images/default_avatar.png';
+    }
+
+    public function getIncrementing()
+    {
+        return false;
     }
 }
